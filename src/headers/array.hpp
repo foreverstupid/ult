@@ -32,7 +32,6 @@ public:
     }
 
     int getLength() const { return pos; }
-    const T *getStorage() const { return storage; }
     const T &getLast() const { return storage[pos - 1]; }
     T &getLast(){ return storage[pos - 1]; }
 

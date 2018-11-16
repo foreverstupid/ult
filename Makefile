@@ -3,14 +3,15 @@ CXXFLAGS = -Wall -g -fno-exceptions
 LDFLAGS = -lm
 LIBS =
 
-SRCS =
-
 SRC_DIR = src
 HEADER_DIR = src/headers
 OBJ_DIR = obj
 
-OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
-NAME=ult
+SRC_FILES = text_operations.cpp
+
+SRCS = $(SRC_FILES:%.cpp=$(SRC_DIR)/%.cpp)
+OBJS = $(SRC_FILES:%.cpp=$(OBJ_DIR)/%.o)
+NAME = ult
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(HEADER_DIR)/%.hpp
 	$(CC) $(CXXFLAGS) -c $< -o $@

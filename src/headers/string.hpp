@@ -6,9 +6,9 @@
 /*
  * Class for string representation
  */
-class String : public Array<char>
-{
-    /* TODO */
-}
+class String : public Array<char>{
+public:
+    const char *getCharArray() const { return storage; }
+};
 
 #endif
