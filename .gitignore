@@ -1,0 +1,15 @@
+# ignore obj files
+obj/
+
+# ignore deps.mk
+deps.mk
+
+# ignore bin file
+ult
+
+# ignore vim files
+*.swp
+*.spo
+
+# ignore text files
+*.txt
