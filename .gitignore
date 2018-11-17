@@ -13,3 +13,6 @@ ult
 
 # ignore text files
 *.txt
+
+# ignore tmp directory
+tmp/

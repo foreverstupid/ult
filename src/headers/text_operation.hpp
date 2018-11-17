@@ -2,6 +2,14 @@
 #define TEXT_OPERATIONS_MODULE_HPP
 
 /*
+ * Checks if a character is a letter
+ */
+inline bool isLetter(char ch)
+{
+    return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
+}
+
+/*
  * Checks if a character is a digit
  */
 inline bool isDigit(char ch)
