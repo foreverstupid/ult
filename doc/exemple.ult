@@ -1,0 +1,24 @@
+# this is a one-line comment
+? this is a multi-line
+  very useless comment.
+  But also multiline ?
+
+a = 12;                     # integer variable
+b = 3.141592;               # float number
+str = 'string';             # string
+strr = "it's a string too"; # yet another string
+
+array[12] = 34;             # pseudo array
+array[1] = "WTF?!"
+
+{
+    # code block that will not be executed
+}
+
+procedure = {
+    # assinging code block to a variable
+    _out("hello");  # built-in function
+    a = $0;         # the first argument of code block
+}
+
+procedure(34);      # executing code block with given parameters
