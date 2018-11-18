@@ -14,11 +14,12 @@ public:
     /* is all text ends */
     virtual bool isEnded() = 0;
 
+    AbstractTextGetter() {}
     virtual ~AbstractTextGetter() {}
 
 private:
     AbstractTextGetter(const AbstractTextGetter &atg);
-    void operator=AbstractTextGetter(const AbstractTextGetter &atg);
+    void operator=(const AbstractTextGetter &atg);
 };
 
 

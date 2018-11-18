@@ -15,7 +15,7 @@ struct Lexeme{
         operation
     };
 
-    String string;      /* lexeme word */
+    String word;        /* lexeme word */
     int type;           /* lexeme type */
 
     int line;           /* line of the source code that holds a lexeme */
@@ -53,7 +53,7 @@ class Lexer{
 public:
     enum TakeCharacterStatus{
         /* return values of takeCharacter */
-        empty, full, error_lexeme,
+        empty, full, lexical_error,
 
         /* lexical errors */
         unexpected_char_error, no_closing_quote_error, identifier_error,
@@ -67,7 +67,7 @@ public:
     void takeCharacter(int ch);
 
     /* returns lexer status */
-    int getLexerStatus();
+    int getLexerStatus() const;
 
     /* returns the next word of a program code.
        In case of error returns error lexeme */
@@ -104,7 +104,10 @@ private:
     void checkExistingLexeme();
 
     /* does a character define a comment */
-    bool isComment(int ch){ return ch == '#' || ch == '?': }
+    bool isComment(char ch){ return ch == '#' || ch == '?'; }
+
+    /* is character an operation */
+    bool isOperation(char ch);
 };
 
 #endif

@@ -1,6 +1,8 @@
 #ifndef TEXT_OPERATIONS_MODULE_HPP
 #define TEXT_OPERATIONS_MODULE_HPP
 
+#include <stdio.h>
+
 /*
  * Checks if a character is a letter
  */

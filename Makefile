@@ -7,17 +7,20 @@ SRC_DIR = src
 HEADER_DIR = src/headers
 OBJ_DIR = obj
 
-SRC_FILES = text_operations.cpp
+SRC_FILES = text_operations.cpp lexer.cpp
 
 SRCS = $(SRC_FILES:%.cpp=$(SRC_DIR)/%.cpp)
 OBJS = $(SRC_FILES:%.cpp=$(OBJ_DIR)/%.o)
 NAME = ult
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(HEADER_DIR)/%.hpp
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(HEADER_DIR)/%.hpp $(OBJ_DIR)
 	$(CC) $(CXXFLAGS) -c $< -o $@
 
 $(NAME): $(SRC_DIR)/main.cpp $(OBJS)
 	$(CC) $(CXXFLAGS) $(LDFLAGS) $^ $(LIBS) -o $@
+
+$(OBJ_DIR):
+	if [ ! -d $(OBJ_DIR) ]; then mkdir obj; fi
 
 ifneq (clean, $(MAKECMDGOALS))
 -include deps.mk

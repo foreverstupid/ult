@@ -20,15 +20,15 @@ public:
 
     Array(){ pos = 0; size = 64; storage = new T[size]; }
     Array(int sz);
-    Array(const Array<T> &darr);
+    Array(const Array<T> &arr);
 
     T &operator[](int i){ return storage[i]; }
     const T&operator[](int i) const { return storage[i]; }
-    void operator=(const Array<T> &darr);
-    void operator+=(const Array<T> &darr);
-    bool operator==(const Array<T> &darr) const
+    void operator=(const Array<T> &arr);
+    void operator+=(const Array<T> &arr);
+    bool operator==(const Array<T> &arr) const
     {
-        return equal(*this, darr);
+        return equal(*this, arr);
     }
 
     int getLength() const { return pos; }
@@ -67,46 +67,46 @@ Array<T>::Array(int sz)
 
 
 template <typename T>
-Array<T>::Array(const Array<T> &darr)
+Array<T>::Array(const Array<T> &arr)
 {
-    size = darr.size;
-    pos = darr.pos;
+    size = arr.size;
+    pos = arr.pos;
     storage = new T[size];
-    copy(storage, darr.storage, pos);
+    copy(storage, arr.storage, pos);
 }
 
 
 
 template <typename T>
-void Array<T>::operator=(const Array<T> &darr)
+void Array<T>::operator=(const Array<T> &arr)
 {
-    if(size <= darr.pos){
+    if(size <= arr.pos){
         delete[] storage;
-        storage = new T[darr.size];
-        size = darr.size;
+        storage = new T[arr.size];
+        size = arr.size;
     }
 
-    pos = darr.pos;
-    copy(storage, darr.storage, darr.pos);
+    pos = arr.pos;
+    copy(storage, arr.storage, arr.pos);
 }
 
 
 
 template <typename T>
-void Array<T>::operator+=(const Array<T> &darr)
+void Array<T>::operator+=(const Array<T> &arr)
 {
     T *tmp;
 
-    if(pos + darr.pos >= size){
-        tmp = new T[size + darr.size];
+    if(pos + arr.pos >= size){
+        tmp = new T[size + arr.size];
         copy(tmp, storage, pos);
-        copy(tmp + pos, darr.storage, darr.pos);
-        size += darr.size;
+        copy(tmp + pos, arr.storage, arr.pos);
+        size += arr.size;
     }else{
-        copy(storage + pos, darr.storage, darr.pos);
+        copy(storage + pos, arr.storage, arr.pos);
     }
 
-    pos += darr.pos;
+    pos += arr.pos;
 }
 
 

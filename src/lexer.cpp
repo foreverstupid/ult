@@ -1,6 +1,6 @@
 #include "headers/lexer.hpp"
 
-const char *Lexer::operations = "&|!-+/%*()[]$<>~";
+const char *Lexer::operations = "=$();+-*/~><,{}&|![]%^";
 
 Lexer::Lexer()
 {
@@ -33,7 +33,7 @@ void Lexer::takeCharacter(int ch)
 int Lexer::getLexerStatus() const
 {
     if(state == error){
-        return error_lexeme;
+        return lexical_error;
     }
 
     if(hasLexemeCreated){
@@ -108,7 +108,7 @@ void Lexer::noneHandler(int ch)
         return;
     }
 
-    lexeme->string.add(ch);
+    lexeme->word.add(ch);
     lexeme->position = position;
     lexeme->line = lineNumber;
 }
@@ -129,7 +129,7 @@ void Lexer::intNumberHandler(int ch)
         lexeme->type = number_error;
     }
 
-    lexeme->string.add(ch);
+    lexeme->word.add(ch);
 }
 
 
@@ -146,7 +146,7 @@ void Lexer::floatNumberHandler(int ch)
         lexeme->type = number_error;
     }
 
-    lexeme->string.add(ch);
+    lexeme->word.add(ch);
 }
 
 
@@ -164,13 +164,13 @@ void Lexer::stringHandler(int ch)
         return;
     }
 
-    if((ch == '"' || ch == '\'') && lexeme->string[0] == ch){
+    if((ch == '"' || ch == '\'') && lexeme->word[0] == ch){
         lexeme->type = Lexeme::string;
         hasLexemeCreated = true;
         state = none;
     }
 
-    lexeme->string.add(ch);
+    lexeme->word.add(ch);
 }
 
 
@@ -178,9 +178,9 @@ void Lexer::stringHandler(int ch)
 void Lexer::identifierHandler(int ch)
 {
     if(checkSeparator(ch)){
-        if(lexeme->string[0] == '@'){
+        if(lexeme->word[0] == '@'){
             lexeme->type = Lexeme::label;
-        }else if(lexeme->string[0] == '_'){
+        }else if(lexeme->word[0] == '_'){
             lexeme->type = Lexeme::built_in;
         }else{
             lexeme->type = Lexeme::identifier;
@@ -194,7 +194,7 @@ void Lexer::identifierHandler(int ch)
         lexeme->type = identifier_error;
     }
 
-    lexeme->string.add(ch);
+    lexeme->word.add(ch);
 }
 
 
@@ -220,21 +220,21 @@ void Lexer::multiLineCommentHandler(int ch)
 void Lexer::escapeCharacterHandler(int ch)
 {
     state = string;
-    lexeme->string.add(ch);
+    lexeme->word.add(ch);
 }
 
 
 
 void Lexer::extraHandler(int ch)
 {
-    checkExisitngLexeme();
+    checkExistingLexeme();
 
-    lexeme->string.add(extraLexeme);
     if(isOperation(extraLexeme)){
+        lexeme->word.add(extraLexeme);
         hasLexemeCreated = true;
         extraLexeme = ch;
     }else{
-        state = getState(extraLexeme);
+        noneHandler(extraLexeme);
         switcher(ch);
     }
 }
@@ -278,9 +278,12 @@ bool Lexer::checkSeparator(int ch)
             extraLexeme = ch;
             extraLexemePos = position;
             extraLexemeLine = lineNumber;
+
+            state = extra;
+        }else{
+            state = none;
         }
 
-        state = extra;
         hasLexemeCreated = true;
 
         return true;
@@ -294,10 +297,23 @@ bool Lexer::checkSeparator(int ch)
 void Lexer::checkExistingLexeme()
 {
     if(hasLexemeCreated){
-        lexeme->string.clean();
+        lexeme->word.clean();
         lexeme->position = position;
         lexeme->line = lineNumber;
 
         hasLexemeCreated = false;
     }
+}
+
+
+
+bool Lexer::isOperation(char ch)
+{
+    for(int i = 0; operations[i]; i++){
+        if(ch == operations[i]){
+            return true;
+        }
+    }
+
+    return false;
 }

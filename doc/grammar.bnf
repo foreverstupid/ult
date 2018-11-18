@@ -1,17 +1,21 @@
 # BNF of ULT
 
-program ::= { statement; } program = code_block;
+program ::= { statement; }
 
-statement ::= definition | if_statement | goto_statement | expression |
+statement ::= assinging | if_statement | goto_statement | expression |
               executing | label: statement
 
-definition ::= identifier = expression
+assinging ::= variable = expression
 
 expression ::= unar_operation expression | (expression) |
-               expression binar_operation expression | literal |
-               $identifier | code_block
+               expression binar_operation expression |
+               expression arg_list | literal
 
-executing ::= identifier arg_list | code_block arg_list
+variable ::= identifier{ \[ expression \] }
+
+literal ::= string | int | float | code_block
+
+code_block ::= \{ program \}
 
 arg_list ::= ( [ expression { , expression } ] )
 
@@ -24,5 +28,3 @@ identifier ::= letter name | _ name
 name ::= letter name | digit name | _ name |
 
 if_statement ::= if ( expression ) code_block
-
-code_block ::= \{ { statement; } \}
