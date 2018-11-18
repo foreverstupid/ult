@@ -38,4 +38,20 @@ public:
     bool isEnded() { return feof(in) != 0; }
 };
 
+
+
+/*
+ * Text getter from a text file
+ */
+class FileTextGetter : public AbstractTextGetter{
+    FILE *in;
+
+public:
+    FileTextGetter(const char *fileName){ in = fopen(fileName, "r"); }
+    ~FileTextGetter(){ fclose(in); }
+
+    int nextChar() { return fgetc(in); }
+    bool isEnded() { return feof(in) != 0; }
+};
+
 #endif

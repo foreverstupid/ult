@@ -1,28 +1,24 @@
 #include <stdio.h>
 
+#include "headers/list.hpp"
 #include "headers/lexer.hpp"
 
 
 
 int main(int argc, const char **argv)
 {
-    Lexer lexer;
-    FILE *in = fopen(argv[1], "r");
+    FileTextGetter tg(argv[1]);
+    List<Lexeme> lexemes;
+    const ListItem<Lexeme> *curr;
 
-    int ch;
-
-    while((ch = getc(in)) != EOF){
-        lexer.takeCharacter(ch);
-        if(lexer.getLexerStatus() == Lexer::full){
-            Lexeme *lex = lexer.getLexeme();
-            printf("%s\n", lex->word.getCharArray());
-            delete lex;
-        }else if(lexer.getLexerStatus() == Lexer::lexical_error){
-            Lexeme *err = lexer.getLexeme();
-            printf("### ERROR: %s\n", err->word.getCharArray());
-            delete err;
-            break;
+    if(makeLexemeList(tg, lexemes)){
+        curr = lexemes.getFirstItem();
+        while(curr){
+            printf("%s\n", curr->obj->word.getCharArray());
+            curr = curr->next;
         }
+    }else{
+        printf("### ERROR:\n");
     }
 
     return 0;

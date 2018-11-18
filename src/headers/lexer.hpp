@@ -4,6 +4,7 @@
 #include "text_operations.hpp"
 #include "text_getter.hpp"
 #include "string.hpp"
+#include "list.hpp"
 
 /*
  * Struct that describes a lexeme
@@ -109,5 +110,14 @@ private:
     /* is character an operation */
     bool isOperation(char ch);
 };
+
+
+
+/*
+ * Converts source code to the lexeme list.
+ * Returns true in case of success, and false otherwise.
+ * Error description holding in the last lexeme of the list.
+ */
+bool makeLexemeList(AbstractTextGetter &tg, List<Lexeme> &list);
 
 #endif

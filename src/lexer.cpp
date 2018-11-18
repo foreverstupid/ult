@@ -317,3 +317,28 @@ bool Lexer::isOperation(char ch)
 
     return false;
 }
+
+
+
+
+
+
+bool makeLexemeList(AbstractTextGetter &tg, List<Lexeme> &list)
+{
+    int status;
+    Lexer lexer;
+
+    while(!tg.isEnded()){
+        lexer.takeCharacter(tg.nextChar());
+        status = lexer.getLexerStatus();
+
+        if(status != Lexer::empty){
+            list.add(lexer.getLexeme());
+            if(status == Lexer::lexical_error){
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
