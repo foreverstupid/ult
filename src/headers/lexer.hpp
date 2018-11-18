@@ -11,7 +11,8 @@
 struct Lexeme{
     /* lexeme types */
     enum{
-        int_number, float_number, string, identifier
+        int_number, float_number, string, identifier, label, built_in,
+        operation
     };
 
     String string;      /* lexeme word */
@@ -27,33 +28,46 @@ struct Lexeme{
  * Class that implements automat for lexical analyzing
  */
 class Lexer{
+    static const char *operations;
+
     /* states of the lexing analysis */
     enum{
         none, integer, float_point_number, string, identifier, error,
-        comment
+        one_line_comment, multi_line_comment, escape_character, extra
     };
 
-    AbstractTextGetter *textGetter; /* getter for program text */
     int state;                      /* current state of the lexer */
     Lexeme *lexeme;                 /* current lexeme */
 
-    int errorStatus;                /* error status of the automat */
+    int lineNumber;                 /* current line number */
+    int position;                   /* current position */
+
+    char extraLexeme;               /* extra lexeme that can be created
+                                       if lexeme separator is an
+                                       operation */
+    int extraLexemePos;             /* position of extra lexeme */
+    int extraLexemeLine;            /* line number of extra lexeme */
+
+    bool hasLexemeCreated;          /* has lexer a new lexeme */
 
 public:
-    /* error stati */
-    enum{
-        no_error, wrong_identifier, no_closing_quote
+    enum TakeCharacterStatus{
+        /* return values of takeCharacter */
+        empty, full, error_lexeme,
+
+        /* lexical errors */
+        unexpected_char_error, no_closing_quote_error, identifier_error,
+        number_error
     };
 
-    Lexer(AbstractTextGetter *tg) : textGetter(tg)
-    {
-        state = none;
-        lexeme = new Lexeme();
-    }
+    Lexer();
     ~Lexer(){ delete lexeme; }
 
-    /* takes next character. Returns error status of the automat */
-    int takeCharacter(int ch);
+    /* takes next character */
+    void takeCharacter(int ch);
+
+    /* returns lexer status */
+    int getLexerStatus();
 
     /* returns the next word of a program code.
        In case of error returns error lexeme */
@@ -62,6 +76,10 @@ public:
 private:
     Lexer(const Lexer &lexer);
     void operator=(const Lexer &lexer);
+
+    /* choses automate state if given character is the first character
+       of a lexeme */
+    int getState(int ch);
 
     /* main logic switcher */
     void switcher(int ch);
@@ -72,8 +90,21 @@ private:
     void floatNumberHandler(int ch);
     void stringHandler(int ch);
     void identifierHandler(int ch);
-    void commentHandler(int ch);
-    int errorHandler(int ch);
+    void oneLineCommentHandler(int ch);
+    void multiLineCommentHandler(int ch);
+    void escapeCharacterHandler(int ch);
+    void extraHandler(int ch);
+
+    /* checks if current character is a separator and initiate a new
+       lexeme if it's true. Returns true - if ch is a separator,
+       and false atherwise */
+    bool checkSeparator(int ch);
+
+    /* check if lexeme is created but haven't been taken */
+    void checkExistingLexeme();
+
+    /* does a character define a comment */
+    bool isComment(int ch){ return ch == '#' || ch == '?': }
 };
 
 #endif
