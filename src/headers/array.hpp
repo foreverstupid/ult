@@ -30,6 +30,10 @@ public:
     {
         return equal(*this, arr);
     }
+    bool operator!=(const Array<T> &arr) const
+    {
+        return !this->operator==(arr);
+    }
 
     int getLength() const { return pos; }
     const T &getLast() const { return storage[pos - 1]; }
@@ -112,8 +116,7 @@ void Array<T>::operator+=(const Array<T> &arr)
 
 
 template <typename T>
-bool Array<T>::equal(const Array<T> &a1,
-    const Array<T> &a2)
+bool Array<T>::equal(const Array<T> &a1, const Array<T> &a2)
 {
     int i;
 

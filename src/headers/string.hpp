@@ -8,6 +8,14 @@
  */
 class String : public Array<char>{
 public:
+    bool operator==(const char *str) const;
+    bool operator!=(const char *str) const { !this->operator==(str); }
+    bool operator==(char ch) const
+    {
+        return pos == 1 && storage[0] == ch;
+    }
+    bool operator!=(char ch) const { !this->operator==(ch); }
+
     /* returns string as const char[] */
     const char *getCharArray() const
     {
