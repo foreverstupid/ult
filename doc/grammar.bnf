@@ -3,13 +3,13 @@
 program ::= { statement; }
 
 statement ::= assinging | if_statement | goto_statement | expression |
-              executing | label: statement
+              label: statement
 
 assinging ::= variable = expression
 
 expression ::= unar_operation expression | (expression) |
                expression binar_operation expression |
-               expression arg_list | literal
+               expression arg_list | literal | $variable
 
 variable ::= identifier{ \[ expression \] }
 

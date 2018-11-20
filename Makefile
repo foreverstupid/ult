@@ -1,5 +1,5 @@
 CC = g++
-CXXFLAGS = -Wall -g -fno-exceptions
+CXXFLAGS = -Wall -g -fno-exceptions -DDEBUG
 LDFLAGS = -lm
 LIBS =
 
@@ -7,7 +7,7 @@ SRC_DIR = src
 HEADER_DIR = src/headers
 OBJ_DIR = obj
 
-SRC_FILES = string.cpp text_operations.cpp lexer.cpp
+SRC_FILES = string.cpp text_operations.cpp lexer.cpp syntaxer.cpp
 
 SRCS = $(SRC_FILES:%.cpp=$(SRC_DIR)/%.cpp)
 OBJS = $(SRC_FILES:%.cpp=$(OBJ_DIR)/%.o)

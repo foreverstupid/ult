@@ -9,7 +9,7 @@ str = 'string';             # string
 strr = "it's a string too"; # yet another string
 
 array[12] = 34;             # pseudo array
-array[1] = "WTF?!"
+array[1] = "WTF?!";
 array["expression"][$a] = 12*(2+9/3)~(7-2*8)^3;
 
 {

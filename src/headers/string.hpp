@@ -9,12 +9,12 @@
 class String : public Array<char>{
 public:
     bool operator==(const char *str) const;
-    bool operator!=(const char *str) const { !this->operator==(str); }
+    bool operator!=(const char *str) const { return !(*this == str); }
     bool operator==(char ch) const
     {
         return pos == 1 && storage[0] == ch;
     }
-    bool operator!=(char ch) const { !this->operator==(ch); }
+    bool operator!=(char ch) const { return !(*this == ch); }
 
     /* returns string as const char[] */
     const char *getCharArray() const
