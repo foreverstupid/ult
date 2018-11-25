@@ -1,30 +1,30 @@
 # BNF of ULT
 
-program ::= { statement; }
+<program> ::= { <statement> }
 
-statement ::= assinging | if_statement | goto_statement | expression |
-              label: statement
+<statement> ::= <expression>; | <if_statement> | <goto_statement>; |
+                <assignment>; | <label>: <statement>
 
-assinging ::= variable = expression
+<assignment> ::= <lvalue> = <expression>
 
-expression ::= unar_operation expression | (expression) |
-               expression binar_operation expression |
-               expression arg_list | literal | $variable
+<lvalue> ::= <identifier><tail>
 
-variable ::= identifier{ \[ expression \] }
+<tail> ::= <indexator><tail> | <args><tail> |
 
-literal ::= string | int | float | code_block
+<indexator> ::= \[ <expression> \]
 
-code_block ::= \{ program \}
+<args> ::= ( <end_of_args>
 
-arg_list ::= ( [ expression { , expression } ] )
+<end_of_args> ::= ) | <expression> {, <expression> } )
 
-goto_statement ::= goto label
+<expression> ::= [ <unar> ] <operand> { <binar><expression> }<tail>
 
-label ::= @identifier
+<operand> ::= ( <expression> ) | <literal> | $<lvalue>
 
-identifier ::= letter name | _ name
+<literal> ::= <string> | <int> | <float> | <code_block>
 
-name ::= letter name | digit name | _ name |
+<code_block> ::= \{ <program> \}
 
-if_statement ::= if ( expression ) code_block
+<goto_statement> ::= <goto> <label>
+
+<if_statement> ::= if ( <expression> ) <code_block>
