@@ -1,37 +1,30 @@
 #ifndef SYNTAXER_CLASS_HPP
 #define SYNTAXER_CLASS_HPP
 
-#ifdef DEBUG
-#include <stdio.h>
-#endif
-
 #include "list.hpp"
 #include "lexer.hpp"
+#include "debug_trace.hpp"
 
 /*
  * Syntax analyzer
  */
 class Syntaxer{
-#   ifdef DEBUG
-    int shift;
-    int shiftInc;
-#   endif
+    SyntaxTreeTracer tracer;        /* for debug */
 
     static const char *unarOperations;
     static const char *binarOperations;
 
-    const ListItem<Lexeme> *curr; /* current observable lexeme */
-    const ListItem<Lexeme> *prev; /* previous observable lexeme */
+    const ListItem<Lexeme> *curr;   /* current observable lexeme */
+    const ListItem<Lexeme> *prev;   /* previous observable lexeme */
+
+    int errorCode;                  /* code of syntax error */
 
 public:
     /* error codes */
     enum{
         column_expected_error,
         statement_expected_error,
-        asignment_expected_error,
-        expression_in_asignment_expected_error,
         closing_bracket_expected_error,
-        variable_identifier_expected_error,
         closing_index_bracket_expected_error,
         open_bracket_in_arg_list_expected_error,
         comma_in_arg_list_expected_error,
@@ -41,16 +34,14 @@ public:
         if_key_word_expected_error,
         semicolon_after_label_expected_error,
         open_curve_bracket_in_code_block_expected_error,
-        closing_curve_bracket_in_code_block_expected_error
+        closing_curve_bracket_in_code_block_expected_error,
+        statement_delimiter_expected_error,
+        assignment_expected_error,
+        identifier_in_lvalue_expected_error,
+        open_braket_in_indexator_expected_error
     };
 
-    Syntaxer()
-    {
-#       ifdef DEBUG
-        shift = 0;
-        shiftInc = 2;
-#       endif
-    }
+    Syntaxer() {}
 
     /* main anilyzing logic. Returns 0 if analyzing was successful
        and ListItem with invalid lexeme otherwise */
@@ -61,7 +52,7 @@ private:
     void operator=(const Syntaxer &sntxr);
 
     /* sets error code */
-    void setErrorCode(int err){ prev->obj->type = err; }
+    void setErrorCode(int err){ errorCode = err; }
 
     /* makes one step */
     void step();
@@ -69,9 +60,13 @@ private:
     /* grammar states */
     bool program();
     bool statement();
-    bool asigning();
+    bool assignment();
+    bool lvalue();
+    bool tail();
+    bool indexator();
+    bool args();
     bool expression();
-    bool variable();
+    bool operand();
     bool literal();
     bool codeBlock();
     bool argList();

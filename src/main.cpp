@@ -17,7 +17,16 @@ int main(int argc, const char **argv)
         printf("============ LEXICAL ANALYZING ============\n");
         curr = lexemes.getFirstItem();
         while(curr){
-            printf("%s\n", curr->obj->word.getCharArray());
+            int t = curr->obj->type;
+            const char *type =
+                t == Lexeme::int_number ? "int" :
+                t == Lexeme::float_number ? "float":
+                t == Lexeme::string ? "string":
+                t == Lexeme::identifier ? "identifier":
+                t == Lexeme::built_in ? "built_in":
+                t == Lexeme::label ? "label":
+                t == Lexeme::operation ? "operation" : "";
+            printf("%20s:%s\n", curr->obj->word.getCharArray(), type);
             curr = curr->next;
         }
 

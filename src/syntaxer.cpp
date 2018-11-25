@@ -10,6 +10,7 @@ const ListItem<Lexeme> *Syntaxer::analyze(List<Lexeme> &lexemes)
     if(program()){
         return 0;
     }else{
+        prev->obj->type = errorCode;
         return prev;
     }
 }
@@ -23,39 +24,25 @@ void Syntaxer::step()
     }
 
     curr = curr->next;
-
-#   ifdef DEBUG
-    printf("%*s%s ", shift, "", prev->obj->word.getCharArray());
-#   endif
+    tracer.write(prev->obj->word.getCharArray());
 }
 
 
 
 bool Syntaxer::program()
 {
-#   ifdef DEBUG
-    printf("\n%*s%s\n", shift, "", "<PROGRAM>");
-    shift += shiftInc;
-#   endif
+    tracer.enter("__PROGRAM__");
 
     while(curr){
         if(!statement()){
-            return false;
-        }
-
-        if(curr->obj->word != ';'){
-            setErrorCode(column_expected_error);
+            tracer.exit(false);
             return false;
         }
 
         step();
     }
 
-#   ifdef DEBUG
-    shift -= shiftInc;
-    printf("\n%*s%s\n", shift, "", "</PROGRAM>");
-#   endif
-
+    tracer.exit(true);
     return true;
 }
 
@@ -63,97 +50,178 @@ bool Syntaxer::program()
 
 bool Syntaxer::statement()
 {
-#   ifdef DEBUG
-    printf("\n%*s%s\n", shift, "", "<STATEMENT>");
-    shift += shiftInc;
-#   endif
+    bool hlp;
+
+    tracer.enter("__STATEMENT__");
 
     if(curr->obj->type == Lexeme::label){
         step();
         if(curr->obj->word != ':'){
             setErrorCode(semicolon_after_label_expected_error);
+            tracer.exit(false);
             return false;
         }
 
         step();
-        if(!statement()){
-            return false;
-        }
 
-#       ifdef DEBUG
-        shift -= shiftInc;
-        printf("\n%*s%s\n", shift, "", "</STATEMENT>");
-#       endif
-        return true;
-    }
-
-
-    if(asigning()){
-
-#       ifdef DEBUG
-        shift -= shiftInc;
-        printf("\n%*s%s\n", shift, "", "</STATEMENT>");
-#       endif
-        return true;
+        hlp = statement();
+        tracer.exit(hlp);
+        return hlp;
     }
 
     if(ifStatement()){
-
-#       ifdef DEBUG
-        shift -= shiftInc;
-        printf("\n%*s%s\n", shift, "", "</STATEMENT>");
-#       endif
+        tracer.exit(true);
         return true;
     }
 
-    if(gotoStatement()){
-
-#       ifdef DEBUG
-        shift -= shiftInc;
-        printf("\n%*s%s\n", shift, "", "</STATEMENT>");
-#       endif
+    if(expression() || gotoStatement() || assignment()){
+        tracer.exit(true);
         return true;
     }
 
-    if(expression()){
-
-#       ifdef DEBUG
-        shift -= shiftInc;
-        printf("\n%*s%s\n", shift, "", "</STATEMENT>");
-#       endif
-        return true;
-    }
-
+    tracer.exit(false);
     return false;
 }
 
 
 
-bool Syntaxer::asigning()
+bool Syntaxer::assignment()
 {
-#   ifdef DEBUG
-    printf("\n%*s%s\n", shift, "", "<ASIGNING>");
-    shift += shiftInc;
-#   endif
+    bool hlp;
 
-    if(!variable()){
+    tracer.enter("__ASSIGNMENT__");
+
+    if(!lvalue()){
+        tracer.exit(false);
         return false;
     }
 
     if(curr->obj->word != '='){
-        setErrorCode(asignment_expected_error);
+        setErrorCode(assignment_expected_error);
+        tracer.exit(false);
         return false;
     }
 
     step();
-    if(!expression()){
+
+    hlp = expression();
+    tracer.exit(hlp);
+    return hlp;
+}
+
+
+
+bool Syntaxer::lvalue()
+{
+    bool hlp;
+
+    tracer.enter("__LVALUE__");
+
+    if(curr->obj->type != Lexeme::identifier){
+        setErrorCode(identifier_in_lvalue_expected_error);
+        tracer.exit(false);
         return false;
     }
 
-#   ifdef DEBUG
-    shift -= shiftInc;
-    printf("\n%*s%s\n", shift, "", "</ASIGNING>");
-#   endif
+    step();
+
+    hlp = tail();
+    tracer.exit(hlp);
+    return hlp;
+}
+
+
+
+bool Syntaxer::tail()
+{
+    bool hlp;
+
+    tracer.enter("__TAIL__");
+
+    if(indexator() || args()){
+        hlp = tail();
+        tracer.exit(hlp);
+        return hlp;
+    }
+
+    tracer.exit(true);
+    return true;
+}
+
+
+
+bool Syntaxer::indexator()
+{
+    tracer.enter("__INDEXATOR__");
+
+    if(curr->obj->word != '['){
+        setErrorCode(open_braket_in_indexator_expected_error);
+        tracer.exit(false);
+        return false;
+    }
+
+    step();
+
+    if(!expression()){
+        tracer.exit(false);
+        return false;
+    }
+
+    if(curr->obj->word != ']'){
+        setErrorCode(closing_index_bracket_expected_error);
+        tracer.exit(false);
+        return false;
+    }
+
+    step();
+
+    tracer.exit(true);
+    return true;
+}
+
+
+
+bool Syntaxer::args()
+{
+    tracer.enter("__ARGS__");
+
+    if(curr->obj->word != ')'){
+        setErrorCode(open_bracket_in_arg_list_expected_error);
+        tracer.exit(false);
+        return false;
+    }
+
+    step();
+
+    if(curr->obj->word == ')'){
+        step();
+        tracer.exit(true);
+        return true;
+    }
+
+    if(!expression()){
+        tracer.exit(false);
+        return false;
+    }
+
+    while(curr->obj->word != ')'){
+        if(curr->obj->word != ','){
+            setErrorCode(comma_in_arg_list_expected_error);
+            tracer.exit(false);
+            return false;
+        }
+
+        step();
+
+        if(!expression()){
+            tracer.exit(false);
+            return false;
+        }
+    }
+
+    step();
+
+    tracer.exit(true);
     return true;
 }
 
@@ -161,242 +229,113 @@ bool Syntaxer::asigning()
 
 bool Syntaxer::expression()
 {
-#   ifdef DEBUG
-    printf("\n%*s%s\n", shift, "", "<EXPRESSION>");
-    shift += shiftInc;
-#   endif
+    bool hlp;
+
+    tracer.enter("__EXPRESSION__");
 
     if(isOperation(curr->obj, unarOperations)){
         step();
+    }
+
+    if(!operand()){
+        tracer.exit(false);
+        return false;
+    }
+
+    while(isOperation(curr->obj, binarOperations)){
+        step();
 
         if(!expression()){
+            tracer.exit(false);
             return false;
         }
-
-#       ifdef DEBUG
-        shift -= shiftInc;
-        printf("\n%*s%s\n", shift, "", "</EXPRESSION>");
-#       endif
-
-        return true;
     }
+
+    hlp = tail();
+    tracer.exit(hlp);
+    return hlp;
+}
+
+
+
+bool Syntaxer::operand()
+{
+    bool hlp;
+
+    tracer.enter("__ENTER__");
 
     if(curr->obj->word == '('){
         step();
 
         if(!expression()){
+            tracer.exit(false);
             return false;
         }
 
         if(curr->obj->word != ')'){
             setErrorCode(closing_bracket_expected_error);
+            tracer.exit(false);
             return false;
         }
 
         step();
 
-#       ifdef DEBUG
-        shift -= shiftInc;
-        printf("\n%*s%s\n", shift, "", "</EXPRESSION>");
-#       endif
-        return true;
-    }
-
-    if(literal()){
-
-#       ifdef DEBUG
-        shift -= shiftInc;
-        printf("\n%*s%s\n", shift, "", "</EXPRESSION>");
-#       endif
+        tracer.exit(true);
         return true;
     }
 
     if(curr->obj->word == '$'){
         step();
 
-        if(!variable()){
-            return false;
-        }
-
-#       ifdef DEBUG
-        shift -= shiftInc;
-        printf("\n%*s%s\n", shift, "", "</EXPRESSION>");
-#       endif
-
-        return true;
+        hlp = lvalue();
+        tracer.exit(hlp);
+        return hlp;
     }
 
-    if(expression()){
-        if(isOperation(curr->obj, binarOperations)){
-            step();
-
-            if(!expression()){
-                return false;
-            }
-
-#           ifdef DEBUG
-            shift -= shiftInc;
-            printf("\n%*s%s\n", shift, "", "</EXPRESSION>");
-#           endif
-
-            return true;
-        }
-
-        if(argList()){
-
-#           ifdef DEBUG
-            shift -= shiftInc;
-            printf("\n%*s%s\n", shift, "", "</EXPRESSION>");
-#           endif
-            return true;
-        }
-
-        return false;
-    }
-
-    return false;
-}
-
-
-
-bool Syntaxer::variable()
-{
-#   ifdef DEBUG
-    printf("\n%*s%s\n", shift, "", "<VARIABLE>");
-    shift += shiftInc;
-#   endif
-
-    if(curr->obj->type != Lexeme::identifier){
-        setErrorCode(variable_identifier_expected_error);
-        return false;
-    }
-
-    step();
-    while(curr->obj->word == '['){
-        step();
-
-        if(!expression()){
-            return false;
-        }
-
-        if(curr->obj->word != ']'){
-            setErrorCode(closing_index_bracket_expected_error);
-            return false;
-        }
-
-        step();
-    }
-
-#   ifdef DEBUG
-    shift -= shiftInc;
-    printf("\n%*s%s\n", shift, "", "</VARIABLE>");
-#   endif
-    return true;
+    hlp = literal();
+    tracer.exit(hlp);
+    return hlp;
 }
 
 
 
 bool Syntaxer::literal()
 {
-#   ifdef DEBUG
-    printf("\n%*s%s\n", shift, "", "<LITERAL>");
-    shift += shiftInc;
-#   endif
-
+    bool hlp;
     int type = curr->obj->type;
 
-    if(type == Lexeme::string || type == Lexeme::int_number ||
-        type == Lexeme::float_number)
-    {
-        step();
+    tracer.enter("__LITERAL__");
 
-#       ifdef DEBUG
-        shift -= shiftInc;
-        printf("\n%*s%s\n", shift, "", "</LITERAL>");
-#       endif
-        return true;
-    }
+    hlp = type == Lexeme::int_number || type == Lexeme::float_number ||
+        type == Lexeme::string || codeBlock();
 
-    if(codeBlock()){
-#       ifdef DEBUG
-        shift -= shiftInc;
-        printf("\n%*s%s\n", shift, "", "</LITERAL>");
-#       endif
-        return true;
-    }
-
-    return false;
-}
-
-
-
-bool Syntaxer::argList()
-{
-#   ifdef DEBUG
-    printf("\n%*s%s\n", shift, "", "<ARGLIST>");
-    shift += shiftInc;
-#   endif
-
-    if(curr->obj->word != '('){
-        setErrorCode(open_bracket_in_arg_list_expected_error);
-        return false;
-    }
-
-    step();
-    if(expression()){
-        while(curr->obj->word != ')'){
-            if(curr->obj->word != ','){
-                setErrorCode(comma_in_arg_list_expected_error);
-                return false;
-            }
-
-            step();
-            if(!expression()){
-                return false;
-            }
-        }
-    }else{
-        if(curr->obj->word != ')'){
-            setErrorCode(closing_bracket_in_arg_list_expected_error);
-            return false;
-        }
-    }
-
-    step();
-
-#   ifdef DEBUG
-    shift -= shiftInc;
-    printf("\n%*s%s\n", shift, "", "</ARGLIST>");
-#   endif
-    return true;
+    tracer.exit(hlp);
+    return hlp;
 }
 
 
 
 bool Syntaxer::gotoStatement()
 {
-#   ifdef DEBUG
-    printf("\n%*s%s\n", shift, "", "<GOTO>");
-    shift += shiftInc;
-#   endif
+    tracer.enter("__GOTO__");
 
     if(curr->obj->word != "goto"){
         setErrorCode(goto_key_word_expected_error);
+        tracer.exit(false);
         return false;
     }
 
     step();
+
     if(curr->obj->type != Lexeme::label){
         setErrorCode(label_expected_error);
+        tracer.exit(false);
         return false;
     }
 
     step();
 
-#   ifdef DEBUG
-    shift -= shiftInc;
-    printf("\n%*s%s\n", shift, "", "</GOTO>");
-#   endif
+    tracer.exit(true);
     return true;
 }
 
@@ -404,32 +343,30 @@ bool Syntaxer::gotoStatement()
 
 bool Syntaxer::codeBlock()
 {
-#   ifdef DEBUG
-    printf("\n%*s%s\n", shift, "", "<CODE_BLOCK>");
-    shift += shiftInc;
-#   endif
+    tracer.enter("__CODE_BLOCK__");
 
     if(curr->obj->word != '{'){
         setErrorCode(open_curve_bracket_in_code_block_expected_error);
+        tracer.exit(false);
         return false;
     }
 
     step();
+
     if(!program()){
+        tracer.exit(false);
         return false;
     }
 
     if(curr->obj->word != '}'){
         setErrorCode(closing_curve_bracket_in_code_block_expected_error);
+        tracer.exit(false);
         return false;
     }
 
     step();
 
-#   ifdef DEBUG
-    shift -= shiftInc;
-    printf("\n%*s%s\n", shift, "", "</CODE_BLOCK>");
-#   endif
+    tracer.exit(true);
     return true;
 }
 
@@ -437,30 +374,29 @@ bool Syntaxer::codeBlock()
 
 bool Syntaxer::ifStatement()
 {
-#   ifdef DEBUG
-    printf("\n%*s%s\n", shift, "", "<IF>");
-    shift += shiftInc;
-#   endif
+    tracer.enter("__IF__");
 
     if(curr->obj->word != "if"){
         setErrorCode(if_key_word_expected_error);
+        tracer.exit(false);
         return false;
     }
 
     step();
+
+    /* CHECK: do we need brackets */
+
     if(!expression()){
+        tracer.exit(false);
         return false;
     }
 
     if(!codeBlock()){
+        tracer.exit(false);
         return false;
     }
 
-#   ifdef DEBUG
-    shift -= shiftInc;
-    printf("\n%*s%s\n", shift, "", "</IF>");
-#   endif
-
+    tracer.exit(true);
     return true;
 }
 

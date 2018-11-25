@@ -7,7 +7,7 @@ SRC_DIR = src
 HEADER_DIR = src/headers
 OBJ_DIR = obj
 
-SRC_FILES = string.cpp text_operations.cpp lexer.cpp syntaxer.cpp
+SRC_FILES = string.cpp text_operations.cpp lexer.cpp syntaxer.cpp \
 		    debug_trace.cpp
 
 SRCS = $(SRC_FILES:%.cpp=$(SRC_DIR)/%.cpp)
