@@ -22,7 +22,6 @@ class Syntaxer{
 public:
     /* error codes */
     enum{
-        column_expected_error,
         statement_expected_error,
         closing_bracket_expected_error,
         closing_index_bracket_expected_error,
@@ -34,7 +33,6 @@ public:
         if_key_word_expected_error,
         semicolon_after_label_expected_error,
         open_curve_bracket_in_code_block_expected_error,
-        closing_curve_bracket_in_code_block_expected_error,
         statement_delimiter_expected_error,
         assignment_expected_error,
         identifier_in_lvalue_expected_error,
@@ -67,6 +65,7 @@ private:
     bool args();
     bool expression();
     bool operand();
+    bool deref();
     bool literal();
     bool codeBlock();
     bool argList();

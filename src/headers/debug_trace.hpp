@@ -35,26 +35,12 @@ public:
     void enter(const char *name);   /* called when entering term */
     void exit(bool success);        /* called when exiting term */
 
-    void write(const char *str)
-    {
-#       ifdef DEBUG
-        writeMissing();
-        if(!isShifted){
-            printf("%*s", shift, "");
-            isShifted = true;
-        }
-        printf("%s ", str);
-#       endif
-    }
+    void write(const char *str);
 
 private:
-    /* writes one term with given shift */
-    void writeTerm(const char *str, int shift)
-    {
-#       ifdef DEBUG
-        printf("%*s%s\n", shift, "", str);
-#       endif
-    }
+    /* writes one term with given shift. If isOpening == true, writes
+       open tag, otherwise - close tag */
+    void writeTerm(const char *str, int shift, bool isOpening);
 
     /* writes all missing terms */
     void writeMissing();

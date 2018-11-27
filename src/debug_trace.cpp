@@ -19,8 +19,7 @@ void SyntaxTreeTracer::enter(const char *name)
 void SyntaxTreeTracer::exit(bool success)
 {
 #   ifdef DEBUG
-    delete names.pop();
-    shift -= shiftInc;
+    const TraceInfo *hlp;
 
     if(success){
         if(isShifted){
@@ -29,7 +28,45 @@ void SyntaxTreeTracer::exit(bool success)
         }
 
         writeMissing();
+        hlp = names.getFirst();
+        writeTerm(hlp->word.getCharArray(), hlp->shift, false);
     }
+
+    delete names.pop();
+    shift -= shiftInc;
+#   endif
+}
+
+
+
+void SyntaxTreeTracer::write(const char *str)
+{
+#   ifdef DEBUG
+    writeMissing();
+
+    if(!isShifted){
+        printf("%*s", shift, "");
+        isShifted = true;
+    }
+
+    printf("%s ", str);
+#   endif
+}
+
+
+
+void SyntaxTreeTracer::writeTerm(const char *str, int shift,
+    bool isOpening)
+{
+#   ifdef DEBUG
+    printf("%*s", shift, "");
+
+    putchar('<');
+    if(!isOpening){
+        putchar('/');
+    }
+
+    printf("%s>\n", str);
 #   endif
 }
 
@@ -42,16 +79,26 @@ void SyntaxTreeTracer::writeMissing()
     TraceInfo *hlp;
 
     tmp = names.getFirstItem();
-    while(tmp && tmp->next && !tmp->obj->isWritten){
+    if(!tmp || tmp->obj->isWritten){
+        return;
+    }
+
+    while(tmp->next && !tmp->next->obj->isWritten){
         tmp = tmp->next;
     }
 
-    while(tmp && !tmp->obj->isWritten){
+    while(tmp){
+        if(isShifted){
+            putchar('\n');
+            isShifted = false;
+        }
+
         hlp = tmp->obj;
-        writeTerm(hlp->word.getCharArray(), hlp->shift);
+        writeTerm(hlp->word.getCharArray(), hlp->shift, true);
         hlp->isWritten = true;
 
         tmp = tmp->prev;
     }
+
 #   endif
 }

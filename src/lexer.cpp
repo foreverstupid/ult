@@ -180,8 +180,6 @@ void Lexer::identifierHandler(int ch)
     if(checkSeparator(ch)){
         if(lexeme->word[0] == '@'){
             lexeme->type = Lexeme::label;
-        }else if(lexeme->word[0] == '_'){
-            lexeme->type = Lexeme::built_in;
         }else{
             lexeme->type = Lexeme::identifier;
         }
@@ -231,6 +229,7 @@ void Lexer::extraHandler(int ch)
 
     if(isOperation(extraLexeme)){
         lexeme->word.add(extraLexeme);
+        lexeme->type = Lexeme::operation;
         hasLexemeCreated = true;
         extraLexeme = ch;
     }else{

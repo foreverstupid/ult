@@ -14,12 +14,12 @@ array["expression"][$a] = 12*(2+9/3)~(7-2*8)^3;
 
 {
     # code block that will not be executed
-}
+};
 
 procedure = {
     # assinging code block to a variable
-    _out("hello");  # built-in function
+    $out("hello");  # built-in function
     a = $0;         # the first argument of code block
-}
+};
 
-procedure(34);      # executing code block with given parameters
+$procedure(34);      # executing code block with given parameters

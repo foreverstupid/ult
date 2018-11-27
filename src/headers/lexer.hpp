@@ -12,8 +12,7 @@
 struct Lexeme{
     /* lexeme types */
     enum{
-        int_number, float_number, string, identifier, label, built_in,
-        operation
+        int_number, float_number, string, identifier, label, operation
     };
 
     String word;        /* lexeme word */

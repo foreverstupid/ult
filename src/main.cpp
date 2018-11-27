@@ -4,6 +4,24 @@
 #include "headers/lexer.hpp"
 #include "headers/syntaxer.hpp"
 
+const char *err_msgs[] = {
+    "Expected statement",
+    "Expected ')' in expression",
+    "Expected ']'",
+    "Expected '('",
+    "Expected ','",
+    "Expected ')' in arg list",
+    "Expected 'goto' keyword",
+    "Expected label name",
+    "Expected 'if' keyword",
+    "Expected ':'",
+    "Expected '{'",
+    "Expected ';'",
+    "Expected '='",
+    "Expected indentifier in lvalue expression",
+    "Expected '['"
+};
+
 
 
 int main(int argc, const char **argv)
@@ -23,7 +41,6 @@ int main(int argc, const char **argv)
                 t == Lexeme::float_number ? "float":
                 t == Lexeme::string ? "string":
                 t == Lexeme::identifier ? "identifier":
-                t == Lexeme::built_in ? "built_in":
                 t == Lexeme::label ? "label":
                 t == Lexeme::operation ? "operation" : "";
             printf("%20s:%s\n", curr->obj->word.getCharArray(), type);
@@ -34,7 +51,7 @@ int main(int argc, const char **argv)
         curr = syntaxer.analyze(lexemes);
 
         if(curr){
-            printf("### ERROR:\n");
+            printf("### ERROR: %s\n", err_msgs[curr->obj->type]);
         }
     }else{
         printf("### ERROR:\n");

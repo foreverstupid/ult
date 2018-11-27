@@ -31,15 +31,13 @@ void Syntaxer::step()
 
 bool Syntaxer::program()
 {
-    tracer.enter("__PROGRAM__");
+    tracer.enter("PROGRAM");
 
     while(curr){
         if(!statement()){
             tracer.exit(false);
             return false;
         }
-
-        step();
     }
 
     tracer.exit(true);
@@ -52,7 +50,7 @@ bool Syntaxer::statement()
 {
     bool hlp;
 
-    tracer.enter("__STATEMENT__");
+    tracer.enter("STATEMENT");
 
     if(curr->obj->type == Lexeme::label){
         step();
@@ -75,6 +73,14 @@ bool Syntaxer::statement()
     }
 
     if(expression() || gotoStatement() || assignment()){
+        if(curr->obj->word != ';'){
+            setErrorCode(statement_delimiter_expected_error);
+            tracer.exit(false);
+            return false;
+        }
+
+        step();
+
         tracer.exit(true);
         return true;
     }
@@ -89,7 +95,7 @@ bool Syntaxer::assignment()
 {
     bool hlp;
 
-    tracer.enter("__ASSIGNMENT__");
+    tracer.enter("ASSIGNMENT");
 
     if(!lvalue()){
         tracer.exit(false);
@@ -115,7 +121,7 @@ bool Syntaxer::lvalue()
 {
     bool hlp;
 
-    tracer.enter("__LVALUE__");
+    tracer.enter("LVALUE");
 
     if(curr->obj->type != Lexeme::identifier){
         setErrorCode(identifier_in_lvalue_expected_error);
@@ -136,7 +142,7 @@ bool Syntaxer::tail()
 {
     bool hlp;
 
-    tracer.enter("__TAIL__");
+    tracer.enter("TAIL");
 
     if(indexator() || args()){
         hlp = tail();
@@ -152,7 +158,7 @@ bool Syntaxer::tail()
 
 bool Syntaxer::indexator()
 {
-    tracer.enter("__INDEXATOR__");
+    tracer.enter("INDEXATOR");
 
     if(curr->obj->word != '['){
         setErrorCode(open_braket_in_indexator_expected_error);
@@ -183,9 +189,9 @@ bool Syntaxer::indexator()
 
 bool Syntaxer::args()
 {
-    tracer.enter("__ARGS__");
+    tracer.enter("ARGS");
 
-    if(curr->obj->word != ')'){
+    if(curr->obj->word != '('){
         setErrorCode(open_bracket_in_arg_list_expected_error);
         tracer.exit(false);
         return false;
@@ -231,7 +237,7 @@ bool Syntaxer::expression()
 {
     bool hlp;
 
-    tracer.enter("__EXPRESSION__");
+    tracer.enter("EXPRESSION");
 
     if(isOperation(curr->obj, unarOperations)){
         step();
@@ -262,7 +268,7 @@ bool Syntaxer::operand()
 {
     bool hlp;
 
-    tracer.enter("__ENTER__");
+    tracer.enter("OPERAND");
 
     if(curr->obj->word == '('){
         step();
@@ -287,7 +293,7 @@ bool Syntaxer::operand()
     if(curr->obj->word == '$'){
         step();
 
-        hlp = lvalue();
+        hlp = deref();
         tracer.exit(hlp);
         return hlp;
     }
@@ -299,16 +305,41 @@ bool Syntaxer::operand()
 
 
 
+bool Syntaxer::deref()
+{
+    bool hlp;
+
+    tracer.enter("DEREF");
+
+    if(curr->obj->type == Lexeme::int_number){
+        step();
+        tracer.exit(true);
+        return true;
+    }
+
+    hlp = lvalue();
+    tracer.exit(hlp);
+    return hlp;
+}
+
+
+
 bool Syntaxer::literal()
 {
     bool hlp;
     int type = curr->obj->type;
 
-    tracer.enter("__LITERAL__");
+    tracer.enter("LITERAL");
 
-    hlp = type == Lexeme::int_number || type == Lexeme::float_number ||
-        type == Lexeme::string || codeBlock();
+    if(type == Lexeme::int_number || type == Lexeme::float_number ||
+        type == Lexeme::string)
+    {
+        step();
+        tracer.exit(true);
+        return true;
+    }
 
+    hlp = codeBlock();
     tracer.exit(hlp);
     return hlp;
 }
@@ -317,7 +348,7 @@ bool Syntaxer::literal()
 
 bool Syntaxer::gotoStatement()
 {
-    tracer.enter("__GOTO__");
+    tracer.enter("GOTO");
 
     if(curr->obj->word != "goto"){
         setErrorCode(goto_key_word_expected_error);
@@ -343,7 +374,7 @@ bool Syntaxer::gotoStatement()
 
 bool Syntaxer::codeBlock()
 {
-    tracer.enter("__CODE_BLOCK__");
+    tracer.enter("CODE_BLOCK");
 
     if(curr->obj->word != '{'){
         setErrorCode(open_curve_bracket_in_code_block_expected_error);
@@ -353,13 +384,9 @@ bool Syntaxer::codeBlock()
 
     step();
 
-    if(!program()){
-        tracer.exit(false);
-        return false;
-    }
+    while(statement());
 
     if(curr->obj->word != '}'){
-        setErrorCode(closing_curve_bracket_in_code_block_expected_error);
         tracer.exit(false);
         return false;
     }
@@ -374,7 +401,7 @@ bool Syntaxer::codeBlock()
 
 bool Syntaxer::ifStatement()
 {
-    tracer.enter("__IF__");
+    tracer.enter("IF");
 
     if(curr->obj->word != "if"){
         setErrorCode(if_key_word_expected_error);

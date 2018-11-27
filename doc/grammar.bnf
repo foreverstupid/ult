@@ -19,7 +19,9 @@
 
 <expression> ::= [ <unar> ] <operand> { <binar><expression> }<tail>
 
-<operand> ::= ( <expression> ) | <literal> | $<lvalue>
+<operand> ::= ( <expression> ) | <literal> | $<deref>
+
+<deref> ::= <int> | <lvalue>
 
 <literal> ::= <string> | <int> | <float> | <code_block>
 
