@@ -22,4 +22,17 @@ procedure = {
     a = $0;         # the first argument of code block
 };
 
-$procedure(34);      # executing code block with given parameters
+$procedure(34);     # executing code block with given parameters
+
+? examples of functional programming ?
+f = { $0 + $1; };   # the fucntion return value is the last value that
+                    # appeared in the code block
+g = { $0 * $1; };
+? making a superposition of functions ?
+
+h($0, $1) = $f($0, $1) - $g($0, $1);                      # like this
+p($0, $1) = $f($g($0, $1), $g($0, $0));                   # this
+k($0) = $f(2 * $0, $0) + { $0 - $1; }($0, $g($0, $0));    # or even this
+? notabene that in codeblock "$0" and "$1" are local arguments ?
+
+a = $k($p(2, $h(2, 1)));
